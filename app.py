@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template, session, redirect, url_for, flash
+from db import db
 from models import User
-
 
 def create_app():
     ''' To create the application object, and initialize all the extensions
@@ -11,6 +11,9 @@ def create_app():
     return app
 
 app = create_app() # Create the application
+# Binding the database connection to the application
+db.init_app(app)
+db.app = app
 
 @app.route("/")
 def index():
