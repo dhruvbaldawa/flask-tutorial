@@ -67,11 +67,18 @@
       {% block header%}      
       <div class="masthead">
         <ul class="nav nav-pills pull-right">
-          <li><a href="#">Home</a></li>
-          <li><a href="#">Login</a></li>
+          <li><a href="{{ url_for('index') }}">Home</a></li>
+          {% if session['logged_in'] %}
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+          {% else %}
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+          {% endif %}
           <li><a href="#">Contact</a></li>
         </ul>
         <h3 class="muted">Floodo</h3>
+        {% if session['logged_in'] %}
+          <h4 class="muted">Hello, {{ session['user_name'] }}<h4>
+        {% endif %}
       </div>
       <hr>
       {% endblock %}
