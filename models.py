@@ -1,14 +1,16 @@
-# The users in the system.
-USERS = {
-    "dhruv": {"name": "Dhruv Baldawa", "password": "pass"},
-    "jack": {"name": "Jack Sparrow", "password": "pass"},
-}
+from db import db
 
 
-class User(object):
+class User(db.Model):
     """
     User class to take care of user authentication, creation and deletion
     """
+    __tablename__ = 'users' # This will be the name of the table in the database
+    id = db.Column('id', db.Integer, primary_key=True)
+    username = db.Column('username', db.String(255), unique=True, nullable=False)
+    password = db.Column('password', db.String(255), nullable=False)
+    name = db.Column('name', db.String(255), nullable=False)
+
     @classmethod
     def authenticate(cls, username, password):
         ''' Authenticates a user, given his username and password
@@ -28,10 +30,11 @@ class User(object):
             'message' key which gives a human-readable description.
         '''
         # Check if user is in present in the database
-        if username in USERS.keys():
+        user = User.query.filter_by(username=username).first()
+        if user is not None:
             # Check if the user has correct password
-            if USERS[username]['password'] == password:
-                return True, {"name": USERS[username]["name"], 
+            if user.password == password:
+                return True, {"name": user.name, 
                     "message": "Login successful"}
             else:
                 return False, {"message": 'Wrong password'}
