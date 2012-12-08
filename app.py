@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template, session, redirect, url_for, flash
 from db import db
-from models import User
+from models import User, Post
 
 def create_app():
     ''' To create the application object, and initialize all the extensions
@@ -77,6 +77,42 @@ def create_user():
             return redirect(url_for('create_user'))        
     else:
         return render_template('create_user.html')
+
+@app.route("/posts/create", methods=['POST'])
+def create_post():
+    # Create a post
+    body = request.form['body']
+    p = Post(body=body, user_id=session['user_id'])
+    if p.save():
+        flash("Your post was created successfully.", "success")
+    else:
+        flash("There was a problem creating your post", "error")
+    return render_template(url_for('show_posts', user=session['user_id']))
+
+@app.route("/posts/", defaults={'user': None, 'page': 1}) # This allows me to use /posts/
+@app.route("/posts/<user>/", defaults={'page': 1}) # Sets the default page to 1
+@app.route("/posts/<user>/<int:page>") # This allows me to see for a particular user.
+def show_posts(user, page):
+    ''' Takes the "optional" username of the user and a page number to return the
+    posts for the user '''
+    RESULTS_PER_PAGE = 25
+    OFFSET = (page - 1) * RESULTS_PER_PAGE
+    if user is None:
+        posts = Post.query.order_by(Post.created.desc())\
+                    .offset(OFFSET)\
+                    .limit(RESULTS_PER_PAGE).all()
+    else:
+        posts = Post.query.filter_by(user_id=session['user_id'])\
+                    .order_by(Post.created.desc())\
+                    .offset(OFFSET)\
+                    .limit(RESULTS_PER_PAGE).all()
+
+    values = {
+        "page": page, # So that we can give a link to the next page
+        "posts": posts, # The list of all the posts
+    }
+
+    return render_template('show_posts.html', **values)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
