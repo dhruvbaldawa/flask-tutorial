@@ -8,6 +8,10 @@ def create_app():
     '''
     app = Flask(__name__)
     app.config.from_object('config.Config')
+
+    # register the pretty_date filter
+    from filters import pretty_date
+    app.jinja_env.filters['pretty_date'] = pretty_date
     return app
 
 app = create_app() # Create the application
@@ -91,12 +95,13 @@ def create_post():
 
 @app.route("/posts/", defaults={'user': None, 'page': 1}) # This allows me to use /posts/
 @app.route("/posts/<user>/", defaults={'page': 1}) # Sets the default page to 1
+@app.route("/posts/<int:page>", defaults={'user': None}) # Sets the default user to None
 @app.route("/posts/<user>/<int:page>") # This allows me to see for a particular user.
 def show_posts(user, page):
     ''' Takes the "optional" username of the user and a page number to return the
     posts for the user '''
     RESULTS_PER_PAGE = 25
-    OFFSET = (page - 1) * RESULTS_PER_PAGE
+    OFFSET = max(0, (page - 1) * RESULTS_PER_PAGE)
     if user is None:
         posts = Post.query.order_by(Post.created.desc())\
                     .offset(OFFSET)\
@@ -111,6 +116,7 @@ def show_posts(user, page):
     values = {
         "page": page, # So that we can give a link to the next page
         "posts": posts, # The list of all the posts
+        "user": user, # Also, to generate the link
     }
 
     return render_template('show_posts.html', **values)
