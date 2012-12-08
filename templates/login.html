@@ -28,9 +28,17 @@
       }
         </style>
 {% endblock %}
+{% block flash %}{% endblock %}
 {% block content %}
       <form class="form-signin" method="POST" action="{{ url_for('login') }}">
         <h2 class="form-signin-heading">Please sign in</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            {% endif %}
+        {% endwith %}
         <input type="text" class="input-block-level" name="username" placeholder="Username">
         <input type="password" class="input-block-level" name="password" placeholder="Password">
         <label class="checkbox">

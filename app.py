@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, session, redirect, url_for
+from flask import Flask, request, render_template, session, redirect, url_for, flash
 from models import User
 
 app = Flask(__name__)
@@ -24,9 +24,11 @@ def login():
             # Setup the session variables
             session['user_name'] = message['name']
             session['logged_in'] = True
+            flash("Hello %s, %s" % (message['name'], message['message']), 'success')
             return redirect(url_for('index'))
         else:
-            return 'Login unsuccessful'
+            flash(message['message'], 'error')
+            return redirect(url_for('login'))
 
     else:
         # This is executed when the user visits the above route.
@@ -36,6 +38,7 @@ def logout():
     # Destroy the session variables
     session.pop('user_name', None)
     session.pop('logged_in', None)
+    flash('You have been logged out successful', 'success')
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
