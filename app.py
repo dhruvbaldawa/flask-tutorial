@@ -87,7 +87,7 @@ def create_post():
         flash("Your post was created successfully.", "success")
     else:
         flash("There was a problem creating your post", "error")
-    return render_template(url_for('show_posts', user=session['user_id']))
+    return redirect(url_for('show_posts'))
 
 @app.route("/posts/", defaults={'user': None, 'page': 1}) # This allows me to use /posts/
 @app.route("/posts/<user>/", defaults={'page': 1}) # Sets the default page to 1
@@ -102,7 +102,8 @@ def show_posts(user, page):
                     .offset(OFFSET)\
                     .limit(RESULTS_PER_PAGE).all()
     else:
-        posts = Post.query.filter_by(user_id=session['user_id'])\
+        user = User.query.filter_by(username=user).first()
+        posts = Post.query.filter_by(user_id=user.id)\
                     .order_by(Post.created.desc())\
                     .offset(OFFSET)\
                     .limit(RESULTS_PER_PAGE).all()
