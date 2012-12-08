@@ -1,15 +1,20 @@
 from flask import Flask, request, render_template, session, redirect, url_for, flash
 from models import User
 
-app = Flask(__name__)
-app.debug = True
-app.secret_key = 'ThisIsMySecretKey'
 
+def create_app():
+    ''' To create the application object, and initialize all the extensions
+    and configurations
+    '''
+    app = Flask(__name__)
+    app.config.from_object('config.Config')
+    return app
+
+app = create_app() # Create the application
 
 @app.route("/")
 def index():
     return render_template('index.html')
-
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -33,6 +38,7 @@ def login():
     else:
         # This is executed when the user visits the above route.
         return render_template('login.html')
+
 @app.route("/logout")
 def logout():
     # Destroy the session variables
