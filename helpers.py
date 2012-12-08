@@ -1,9 +1,14 @@
-# Reference: http://stackoverflow.com/questions/1551382/python-user-friendly-time-format
+from flask import session, url_for, flash, redirect
+from functools import wraps
+
+
 def pretty_date(time=False):
     """
     Get a datetime object or a int() Epoch timestamp and return a
     pretty string like 'an hour ago', 'Yesterday', '3 months ago',
     'just now', etc
+    
+    Reference: http://stackoverflow.com/questions/1551382/python-user-friendly-time-format
     """
     from datetime import datetime
     now = datetime.now()
@@ -41,3 +46,14 @@ def pretty_date(time=False):
     if day_diff < 365:
         return str(day_diff/30) + " months ago"
     return str(day_diff/365) + " years ago"
+
+def login_required(fn):
+    ''' Only gives access to the user if he is logged in '''
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if 'logged_in' in session:
+            return fn(*args, **kwargs)
+        else:
+            flash('You must login to visit the page.', 'error')
+            return redirect(url_for('index'))
+    return wrapper

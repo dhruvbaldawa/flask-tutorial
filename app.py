@@ -1,6 +1,8 @@
 from flask import Flask, request, render_template, session, redirect, url_for, flash
 from db import db
 from models import User, Post
+from helpers import pretty_date, login_required
+
 
 def create_app():
     ''' To create the application object, and initialize all the extensions
@@ -10,7 +12,6 @@ def create_app():
     app.config.from_object('config.Config')
 
     # register the pretty_date filter
-    from filters import pretty_date
     app.jinja_env.filters['pretty_date'] = pretty_date
     return app
 
@@ -83,6 +84,7 @@ def create_user():
         return render_template('create_user.html')
 
 @app.route("/posts/create", methods=['POST'])
+@login_required
 def create_post():
     # Create a post
     body = request.form['body']
@@ -97,6 +99,7 @@ def create_post():
 @app.route("/posts/<user>/", defaults={'page': 1}) # Sets the default page to 1
 @app.route("/posts/<int:page>", defaults={'user': None}) # Sets the default user to None
 @app.route("/posts/<user>/<int:page>") # This allows me to see for a particular user.
+@login_required
 def show_posts(user, page):
     ''' Takes the "optional" username of the user and a page number to return the
     posts for the user '''
