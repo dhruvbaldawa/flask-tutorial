@@ -50,5 +50,31 @@ def logout():
     flash('You have been logged out successful', 'success')
     return redirect(url_for('index'))
 
+@app.route("/user/create", methods=['POST', 'GET'])
+def create_user():
+    if request.method == 'POST':
+        # Create the user
+        print request.form
+        username = request.form['username']
+        password = request.form['password']
+        name     = request.form['name']
+
+        if username and password and name:
+            try:
+                user = User(name=name, username=username, password=password)
+                db.session.add(user)
+                db.session.commit()
+            except:
+                flash("Sorry, an error occured registering you", "error")
+                db.session.rollback()
+                return redirect(url_for('create_user'))
+            flash("You have been registered.", "success")
+            return redirect(url_for('index'))
+        else:
+            flash("Please enter all the fields", "error")
+            return redirect(url_for('create_user'))        
+    else:
+        return render_template('create_user.html')
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
